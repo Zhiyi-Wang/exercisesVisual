@@ -1,0 +1,29 @@
+```{r, eval=True}
+link='https://github.com/EvansDataScience/VisualAnalytics_2_tabularData/raw/master/data/eduwa.rda'
+
+#getting the data TABLE from the file in the cloud:
+load(file=url(link))
+
+#number of rows and columns
+dim(eduwa) #nrow(eduwa) ncol(eduwa)
+
+names(eduwa)
+
+# this 'width = 70,strict.width='cut' means
+# you do not want to see more than 70 characters per row.
+
+str(eduwa,width = 70,strict.width='cut')
+
+head(eduwa$LocaleType,50) #first fifty values
+
+# absolute values
+table(eduwa$LocaleType,exclude = 'nothing')
+
+# relative values
+absoluteT=table(eduwa$LocaleType,exclude = 'nothing')
+prop.table(absoluteT)
+
+# the pie plots the table:
+ToPlot=prop.table(absoluteT)
+pie(ToPlot)
+```

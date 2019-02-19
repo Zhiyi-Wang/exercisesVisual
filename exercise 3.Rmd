@@ -1,0 +1,525 @@
+---
+title: "exercise 2"
+output: html_document
+
+# Zhiyi Wang
+---
+
+```{r, include=FALSE}
+link="https://github.com/EvansDataScience/data/raw/master/crime.RData"
+load(file = url(link))
+
+names(crime)
+
+head(crime)
+```
+
+```{r str, eval=FALSE}
+str(crime,width = 70,strict.width='cut')
+```
+
+```{r table, eval=FALSE}
+(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime))
+```
+
+```{r table_rel_PIPES,eval=FALSE}
+library(magrittr)
+(CrimeTotal=table(crime$crimecat,crime$Occurred.DayTime)%>% 
+        prop.table() %>% 
+        "*"(100)%>% 
+        round(2) 
+        )
+```
+
+```{r table_byCol,eval=FALSE}
+CrimeCol=table(crime$crimecat,crime$Occurred.DayTime)%>%
+         prop.table(margin = 2)%>%  
+         "*"(100)%>%
+         round(3)
+
+CrimeCol
+```
+
+```{r BADplot,eval=FALSE}
+barplot(CrimeCol)
+```
+
+```{r convertToDFgg,eval=FALSE}
+df.T=as.data.frame(CrimeTotal)
+head(df.T)
+```
+
+```{r, eval=FALSE}
+names(df.T)=c('Crime','Daytime','Percent') 
+head(df.T)
+```
+
+```{r plotTable_gg, eval=FALSE}
+library(ggplot2)                           
+base = ggplot(df.T, aes(Daytime,Crime)) 
+
+tablePlot1 = base + geom_point(aes(size = Percent), colour = "gray") 
+
+tablePlot2 = tablePlot1 + geom_text(aes(label = Percent),
+                                    nudge_x = 0.1,
+                                    size=2)
+tablePlot2
+```
+
+```{r, eval=FALSE}
+tablePlot3 = tablePlot2 + scale_size_continuous(range=c(0,10)) 
+tablePlot4 = tablePlot3 + theme_minimal() 
+tablePlot4 + theme(legend.position="none") 
+```
+
+```{r facet, eval=FALSE}
+base  = ggplot(df.T, aes(x = Crime, y = Percent ) ) 
+bars1 = base + geom_bar( stat = "identity" ) + theme_minimal()
+bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 
+```
+
+```{r, eval=FALSE}
+bars3 = bars2 + theme( axis.text.x = element_text(angle = 90,
+                                                  hjust = 1,
+                                                  size=3 ) )
+bars3
+```
+
+```{r flip_facet, eval=FALSE}
+df.C=as.data.frame(CrimeCol)
+colnames(df.C)=c('Crime','Daytime','Percent')
+
+base  = ggplot(df.C, aes(x = Crime, y = Percent ) ) 
+bars1 = base + geom_bar( stat = "identity" )
+bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 + coord_flip()
+```
+
+```{r orderFacet, eval=FALSE}
+base  = ggplot(df.C, aes(x = reorder(Crime, Percent), y = Percent ) ) 
+bars1 = base + geom_bar( stat = "identity" )
+bars2 = bars1 + facet_wrap( ~ Daytime ,nrow = 1) 
+bars2 + coord_flip() + theme(axis.text.y = element_text(size=4,angle = 45)) 
+```
+
+#exercise-1:Turn the bars into lollipop with the right components.
+
+```{r, eval=FALSE}
+base  = ggplot(df.C, aes(x = reorder(Crime, Percent), y = Percent ) ) 
+lolliplot1 = base + geom_bar( stat = "identity" )
+lolliplot2 = lolliplot1 + facet_wrap( ~ Daytime ,nrow = 1) 
+lolliplot2 + coord_flip() + theme(axis.text.y = element_text(size=4,angle = 45)) 
+```
+
+
+
+```{r heatDescending, eval=FALSE}
+# heatplot
+base  = ggplot(df.C, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percent)) 
+heat1 = base +  geom_tile() 
+heat2 = heat1 +scale_fill_gradient(low = "white", 
+                                   high = "black")
+heat2
+```
+
+```{r, eval=FALSE}
+heat3 = heat2 + theme_classic() 
+
+heat4 = heat3 + theme(axis.text.x = element_text(angle = 90, vjust = 0.6), 
+                      legend.title = element_blank(), 
+                      legend.position="top", 
+                      legend.direction="horizontal",
+                      legend.key.width=unit(1, "cm"),
+                      legend.key.height=unit(1, "cm")) 
+
+heat4 + labs(y="Crime")
+```
+
+#Exercise-2:Change the heatplot to ascending order, where intensity goes from yellow to purple.
+
+```{r heatDescending, eval=FALSE}
+# heatplot
+base  = ggplot(df.C, aes(x = Daytime, y = reorder(Crime, Percent), fill = Percent)) 
+heat1 = base +  geom_tile() 
+heat2 = heat1 +scale_fill_gradient(low = "yellow", 
+                                   high = "purple")
+heat3 = heat2 + theme_classic() 
+
+heat4 = heat3 + theme(axis.text.x = element_text(angle = 90, vjust = 0.6), 
+                      legend.title = element_blank(), 
+                      legend.position="top", 
+                      legend.direction="horizontal",
+                      legend.key.width=unit(1, "cm"),
+                      legend.key.height=unit(1, "cm")) 
+
+heat4 + labs(y="Crime")
+```
+
+## Categorical-Numerical relationships
+
+```{r summaryTime, eval=FALSE}
+summary(crime$DaysToReport)
+```
+
+```{r tapply, eval=FALSE}
+tapply(crime$DaysToReport,crime$Precinct,mean)
+```
+
+```{r,boxNumCat1, eval=FALSE}
+boxplot(DaysToReport~Precinct,data=crime)
+```
+
+```{r, tapplySummary, eval=FALSE}
+tapply(crime$DaysToReport,crime$Precinct,summary)
+```
+
+```{r boxDaysToRep, eval=FALSE}
+boxplot(DaysToReport~Precinct,data=crime,
+        subset = DaysToReport>1) 
+```
+
+```{r parMFROW, eval=FALSE}
+par(mfrow=c(2,2)) 
+boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=7,
+        main="One week or more")
+
+boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=30,
+        main="One 30-day month or more")
+
+boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=180,
+        main="180 days or more")
+
+boxplot(DaysToReport~Precinct,data=crime,subset = DaysToReport>=365,
+        main="One year or more")
+```
+
+```{r crimeTapply, eval=FALSE}
+crimeYear=crime[crime$DaysToReport>=365,]
+tapply(crimeYear$DaysToReport,crimeYear$Precinct,length)
+```
+
+```{r casesTapplycount, eval=FALSE}
+tapply(crimeYear$DaysToReport,crimeYear$year,length)
+```
+
+```{r crimeAfter2000, eval=FALSE}
+crimeY2000=crime[(crime$DaysToReport>=365) & (crime$year>=2000),]
+tapply(crimeY2000$DaysToReport,crimeY2000$Precinct,length)
+```
+
+```{r boxpAfter2000, eval=FALSE}
+boxplot(DaysToReport~Precinct,data=crimeY2000,
+        main="One year or more (from 2000)")
+```
+
+```{r convertYear, eval=FALSE}
+crimeY2000$YearsToReport=crimeY2000$DaysToReport/365
+boxplot(YearsToReport~Precinct,data=crimeY2000,
+        main="One year or more (from 2000)")
+```
+
+```{r yearsGT5, eval=FALSE}
+boxplot(YearsToReport~Precinct,data=crimeY2000,subset = YearsToReport>=5,
+        main="Five years or more (from 2000)")
+```
+
+```{r exploreCatBOX, eval=FALSE}
+
+par(mfrow=c(2,1))
+
+boxplot(YearsToReport~weekday,data=crimeY2000,
+        main="One year or more BY WEEKDAY (from 2000)",las=2)
+
+boxplot(YearsToReport~Occurred.DayTime,data=crimeY2000,
+        main="One year or more BY TIME CRIME OCCURRED (from 2000)",las=2)
+
+```
+
+```{r exploreBOX2, eval=FALSE}
+par(mfrow=c(2,1))
+
+boxplot(YearsToReport~year,data=crimeY2000,
+        main="One year or more (from 2000)",las=2)
+
+boxplot(YearsToReport~crimecat,data=crimeY2000,
+        main="One year or more (from 2000)",las=2)
+```
+
+```{r yearsToRep, eval=FALSE}
+crimeYearGG=crimeY2000[complete.cases(crimeY2000$YearsToReport),]
+
+base = ggplot(crimeYearGG,aes(x=factor(year), y=YearsToReport)) 
+box1  = base + geom_boxplot()
+box2  = box1 + labs(title="exercise3:One year or more (from 2000)",
+                     caption = "the Seattle Open Data portal")
+box3 = box2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+box3
+
+```
+
+```{r boxBYE, eval=FALSE}
+
+base  = ggplot(crimeYearGG,aes(x=factor(year), y=YearsToReport))
+box1  = base + geom_boxplot()
+box2  = box1 + labs(title="exercise3:One year or more (from 2000)",
+                     caption = "the Seattle Open Data portal")
+box3 = box2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+mins = box3 + stat_summary(fun.y=min, 
+                           geom="line",
+                           show.legend = T,size=1,
+                           aes(group=1,col='Min'))
+mins
+
+```
+
+```{r, eval=FALSE}
+minsMaxs= mins + stat_summary(fun.y=max,
+                              geom="line",
+                              linetype='dashed',
+                              size=1,show.legend = F,
+                              aes(group=1,col='Max'))
+
+minsMaxs
+
+```
+
+```{r, eval=FALSE}
+minsMaxsMd= minsMaxs + stat_summary(fun.y=median,
+                                    geom="line",size=2,
+                                    aes(group=1,col='Median'))
+minsMaxsMd
+```
+
+```{r, eval=FALSE}
+# Change color of lines:
+all1=minsMaxsMd + scale_colour_manual(name="Trends",
+                                      values=c("blue", "black","red")
+                                      )
+all1
+```
+
+```{r crimeWeek, eval=FALSE}
+# data preparation:
+
+crimeWeek=crime[(crime$DaysToReport<365) & (crime$year>=2000),]
+
+crimeWeek$WeeksToReport=crimeWeek$DaysToReport/7
+
+crimeYearGG2=crimeWeek[complete.cases(crimeWeek$WeeksToReport) &complete.cases(crimeWeek$crimecat),]
+
+```
+
+```{r plotCrimeWeek, eval=FALSE}
+#plotting it:
+base = ggplot(crimeYearGG2,aes(x=factor(year), y=WeeksToReport)) 
+base1  = base + geom_boxplot()
+base2  = base1 + labs(title="exercise3:the crimes that took less than a year to report since 2000",
+                     caption = "the Seattle Open Data portal")
+base3 = base2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+
+mins = base3 + stat_summary(fun.y=min,size=1,
+                           geom="line", linetype='dashed',show.legend = T,
+                           aes(group=1,col='Min'))
+minsMaxs= mins + stat_summary(fun.y=max,
+                              geom="line",size=1,show.legend = F,
+                              aes(group=1,col='Max'))
+minsMaxsMd= minsMaxs + stat_summary(fun.y=median,
+                                    geom="line",size=2,
+                                    aes(group=1,col='Median'))
+all2=minsMaxsMd + scale_colour_manual(name="Trends",
+                                      values=c("blue", "black","red")
+                                      )
+all2 
+```
+
+```{r byCrime, eval=FALSE}
+base= ggplot(crimeYearGG,
+             aes(x = reorder(crimecat, YearsToReport, FUN = max), 
+                 y=YearsToReport)) 
+base1  = base + geom_boxplot()
+base2  = base1 + labs(title="exercise3:the crimes that took less than a year to report since 2000",
+                     caption = "the Seattle Open Data portal")
+base3 = base2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+mins = base3 + stat_summary(fun.y=min,size=1,
+                           geom="line", linetype='dashed',show.legend = T,
+                           aes(group=1,col='Min'))
+minsMaxs= mins + stat_summary(fun.y=max,
+                              geom="line",size=1,show.legend = F,
+                              aes(group=1,col='Max'))
+minsMaxsMd= minsMaxs + stat_summary(fun.y=median, size=2,
+                                    geom="line",
+                                    aes(group=1,col='Median'))
+all3=minsMaxsMd + scale_colour_manual(name="Trends",
+                                      values=c("blue", "black","red"))
+all3 + coord_flip()
+```
+
+```{r byCrime2, eval=FALSE}
+base = ggplot(crimeYearGG2,
+              aes(x = reorder(crimecat, WeeksToReport, FUN = max),
+                  y=WeeksToReport)) 
+base1  = base + geom_boxplot()
+base2  = base1 + labs(title="exercise3:the crimes that took less than a year to report since 2000",
+                     caption = "the Seattle Open Data portal")
+base3 = base2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+mins = base3 + stat_summary(fun.y=min,size=1,
+                           geom="line", linetype='dashed',show.legend = T,
+                           aes(group=1,col='Min'))
+minsMaxs= mins + stat_summary(fun.y=max,
+                              geom="line",size=1,show.legend = F,
+                              aes(group=1,col='Max'))
+minsMaxsMd= minsMaxs + stat_summary(fun.y=median,size=2,
+                                    geom="line",
+                                    aes(group=2,col='Median'))
+all3=minsMaxsMd + scale_colour_manual(name="Trends",
+                                      values=c("blue", "black","red"))
+all3+coord_flip()
+```
+
+#Exercise-3:Complete the information needed in the previous plots.
+
+```{r anova, eval=FALSE}
+anovaData=crimeY2000[crimeY2000$YearsToReport>=5,]
+
+tapply(anovaData$YearsToReport, anovaData$Precinct, mean,na.rm=T)
+```
+```{r CI, eval=FALSE}
+install.packages("Rmisc")
+library(Rmisc)
+
+group.CI(YearsToReport ~ Precinct, 
+         data=anovaData, 
+         ci = 0.95)
+```
+
+```{r plotCI, eval=FALSE}
+anovaData=anovaData[complete.cases(anovaData),]
+
+install.packages("ggpubr")
+library(ggpubr)
+ggline(data=anovaData,x = "Precinct", y = "YearsToReport",add = 'mean_ci',
+       error.plot = "pointrange") + scale_y_continuous(breaks=seq(7,10,0.5))
+
+```
+
+```{r testAnova, eval=FALSE}
+res.aov <- aov(YearsToReport ~ Precinct, data = anovaData)
+
+summary(res.aov)[[1]]$Pr[1]
+```
+
+```{r nonparam, eval=FALSE}
+kruskal.test(YearsToReport ~ Precinct, data = anovaData)
+```
+
+## Numerical-Numerical relationships
+
+```{r aggregate, eval=FALSE}
+daysByNeigh=tapply(crime$DaysToReport, crime$Neighborhood, mean,na.rm=T)
+
+head(daysByNeigh)
+```
+
+```{r, eval=FALSE}
+crimesByNeigh=tapply(crime$crimecat, crime$Neighborhood, length)%>%      
+                     prop.table()%>%
+                     "*"(100)%>% 
+                     round(2) 
+head(crimesByNeigh)
+```
+
+```{r, eval=FALSE}
+library(tibble)
+as.data.frame(daysByNeigh)%>%rownames_to_column()
+```
+
+```{r TOdataFrame, eval=FALSE}
+daysByNeigh=as.data.frame(daysByNeigh)%>%rownames_to_column()
+crimesByNeigh=as.data.frame(crimesByNeigh)%>%rownames_to_column()
+```
+
+```{r mergeDFS, eval=FALSE}
+num_num=merge(daysByNeigh,crimesByNeigh) 
+head(num_num)
+```
+
+```{r scatter, eval=FALSE}
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+plot1= base +  geom_point() 
+plot2 = plot1 + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood",
+                     caption ="the Seattle Open Data portal")
+plot3 = plot2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+plot3
+```
+
+```{r ggscatter, eval=FALSE}
+library(ggrepel)
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,
+                           label=rowname)) 
+plot1= base +  geom_point() 
+plot2 = plot1 + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood",
+                     caption ="the Seattle Open Data portal")
+plot3 = plot2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+plot3 + geom_text_repel()
+```
+
+```{r, eval=FALSE}
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,label=rowname)) 
+plot1= base +  geom_point() 
+plot2 = plot1 + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood",
+                     caption ="the Seattle Open Data portal")
+plot3 = plot2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+plot3 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+                                         num_num$rowname, "")))
+```
+
+```{r simpleScatter,eval=FALSE}
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+scatp1 = base +  geom_point() 
+scatp2 = scatp1 + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood",
+                     caption ="the Seattle Open Data portal")
+scatp3 = scatp2 + theme(panel.background =element_rect(fill = "white",colour = "grey50"))
+scatp3 + geom_text(aes(label=ifelse(crimesByNeigh>=5,num_num$rowname, "")))
+```
+
+```{r scatterSEARCH, eval=FALSE}
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh,label=rowname)) 
+base +  geom_point() + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood",
+                     caption ="the Seattle Open Data portal") + theme(panel.background =element_rect(fill = "white",colour = "grey50")) +
+geom_text_repel(aes(label=ifelse(num_num$rowname=='NORTHGATE',
+                                                        num_num$rowname, "")))
+```
+
+```{r hexbins, eval=FALSE}
+install.packages("hexbin")
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+scatp1 = base +  geom_hex(bins = 10)
+scatp2= scatp1 + geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+                                                  num_num$rowname,
+                                                  ""))) 
+scatp2 + scale_fill_distiller(palette ="Greys",direction=1) + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood (at least 5%)",
+                     caption ="the Seattle Open Data portal")
+
+```
+
+```{r density,eval=FALSE}
+base = ggplot(num_num, aes(daysByNeigh,crimesByNeigh)) 
+scatp1 = base +  stat_density_2d(aes(fill = ..density..), 
+                                 geom = "raster", contour = FALSE)
+scatp2=scatp1+geom_text_repel(aes(label=ifelse(crimesByNeigh>=5,
+                                               num_num$rowname, "")))
+scatp3 = scatp2 +  theme(legend.position='none') 
+scatp4= scatp3 + scale_fill_distiller(palette="Greys", direction=1)  + labs(title="exercise4:means of days to report and proportion of crimes by neighborhood (at least 5%)",
+                     caption ="the Seattle Open Data portal")
+scatp4
+```
+
+```{r, eval=FALSE}
+scatp5 = scatp4 +  scale_x_continuous(expand = c(0, 0)) + 
+         scale_y_continuous(expand = c(0, 0)) 
+scatp5
+```
+
+#Exercise-4:Complete the elements missing in the previous plots.
+
