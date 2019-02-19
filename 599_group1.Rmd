@@ -1,4 +1,16 @@
+<center><img src="http://i.imgur.com/sSaOozN.png" width="500"></center>
 
+
+## 599 FIRST ASSIGNMENT - IN GROUPS
+
+
+### Yiwen Yang, Zhiyi Wang, Ying Yang, Qiqi Wang, 
+
+
+Public schools in the US are offered to the kids elder than 5 years old. We would like to know how 3-to-4-year-old kids attend pre-schools and what are the influencing factors.
+
+
+We used 1% 2000 ACS data in this research. First, we would like to know the race distribution of our sample.
 
 ```{r, include=FALSE}
 link="https://github.com/ps0205vi/Yorozuya/raw/master/VPKdata.csv"
